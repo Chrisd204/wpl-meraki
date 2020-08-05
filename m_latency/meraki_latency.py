@@ -81,6 +81,6 @@ smtpObj.login(login.lab_email,login.lab_email_password)
 smtpObj.sendmail(login.lab_email,login.company_email, message)
 
 smtpObj.quit()
-/
+
 # submitted 8/3/2020
 # changed to 24 hour scheduled,still using 8.8.8.8
