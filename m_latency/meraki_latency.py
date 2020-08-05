@@ -84,3 +84,5 @@ smtpObj.quit()
 
 # submitted 8/3/2020
 # changed to 24 hour scheduled,still using 8.8.8.8
+
+#test change, just to make sure this is working correctly
