@@ -1,9 +1,9 @@
 #Referenced Shiyue (Shay) Cheng, shiychen@cisco.com github site for api calls
 import requests, json
-import datetime, sys, os, shutil
+import datetime, sys
 import pandas as pd
 from pandas import ExcelWriter
-import smtplib, ssl
+import smtplib
 import login
 
 # 24 hours 86400
@@ -54,16 +54,15 @@ if __name__ == '__main__':
     site_keys = sites.keys()
 
     results = []
-    for i in site_keys:
+    for office in site_keys:
         try:
-            for x in sites[i]['lossPercent'].where(sites[i]['lossPercent'] > 4.0).dropna():
-                results.append(i)
+            for loss in sites[office]['lossPercent'].where(sites[office]['lossPercent'] > 4.0).dropna():
+                results.append(office)
         except KeyError:
             continue
     final_results = list(dict.fromkeys(results))
 
 # ------ send mail to company email with site list
-context = ssl.create_default_context()
 smtpObj = smtplib.SMTP(login.smtp_server,login.smtp_port)
 smtpObj.ehlo()
 smtpObj.starttls()
