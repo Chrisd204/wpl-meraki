@@ -33,7 +33,7 @@ if __name__ == '__main__':
 #----- log in statement breaks, and now we create variables for applicances.
     networks = json.loads(session.get('https://api.meraki.com/api/v0/organizations/' + login.org_id + '/networks', headers=headers).text) # layer 1 grabs networks
     inventory = json.loads(session.get('https://api.meraki.com/api/v0/organizations/' + login.org_id + '/inventory', headers=headers).text) # layer 2 pulls full inventory
-    appliances = [device for device in inventory if device['model'][:2] in ('MX', 'Z1', 'Z3', 'vM') and device['networkId'] is not None] # layer 3 grabs only mx equipment
+    appliances = [device for device in inventory if device['model'][:2] in ('MX') and device['networkId'] is not None] # layer 3 grabs only mx equipment
     devices = [device for device in inventory if device not in appliances and device['networkId'] is not None] # layer 4 sources everything else
 
 #------------  Creates excel workbook with applicance data
