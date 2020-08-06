@@ -1,9 +1,8 @@
 #Referenced Shiyue (Shay) Cheng, shiychen@cisco.com github site for api calls
 import requests, json
-import datetime, sys
+import datetime, sys, smtplib
 import pandas as pd
 from pandas import ExcelWriter
-import smtplib
 import login
 
 # 24 hours 86400
