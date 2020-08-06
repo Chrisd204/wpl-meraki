@@ -29,7 +29,7 @@ if __name__ == '__main__':
         name = json.loads(session.get('https://api.meraki.com/api/v0/organizations/' + login.org_id, headers=headers).text)['name'] # gets name of organization
     except:   
         sys.exit('Incorrect API key or org ID, as no valid data returned') # breaks if ID can't be found
-
+    
 #----- log in statement breaks, and now we create variables for applicances.
     networks = json.loads(session.get('https://api.meraki.com/api/v0/organizations/' + login.org_id + '/networks', headers=headers).text) # layer 1 grabs networks
     inventory = json.loads(session.get('https://api.meraki.com/api/v0/organizations/' + login.org_id + '/inventory', headers=headers).text) # layer 2 pulls full inventory
@@ -40,7 +40,6 @@ if __name__ == '__main__':
     today = datetime.date.today()
     w = pd.ExcelWriter('wpl-'+str(today)+'.xlsx') # creates file name
     for appliance in appliances:
-            network_name = get_network_name(appliance['networkId'], networks) # possibly not needed, but left just in case of dependencies
             device_name = json.loads(session.get('https://api.meraki.com/api/v0/networks/' + appliance['networkId'] + '/devices/' + appliance['serial'], headers=headers).text)['name']
             packloss_latency = json.loads(session.get('https://api.meraki.com/api/v0/networks/'+appliance['networkId'] + '/devices/'+appliance['serial']+ '/lossAndLatencyHistory?uplink=wan1&ip=8.8.8.8&timespan=86400', headers=headers).text)
             try:
@@ -62,13 +61,9 @@ if __name__ == '__main__':
                 results.append(i)
         except KeyError:
             continue
-
     final_results = list(dict.fromkeys(results))
 
-    #print(final_results)
-
 # ------ send mail to company email with site list
-context = ssl.create_default_context()
 smtpObj = smtplib.SMTP(login.smtp_server,login.smtp_port)
 smtpObj.ehlo()
 smtpObj.starttls()
@@ -76,13 +71,6 @@ message = ("""Subject: Alert for Community Options Inc -All Mx's - Uplink Packet
 The following sites have experienced packet loss above 4 percent during the last 7 days.\n\n
 """ + str(final_results))
 subject = "Weekly Packet Loss Updates"
-
 smtpObj.login(login.lab_email,login.lab_email_password)
 smtpObj.sendmail(login.lab_email,login.company_email, message)
-
 smtpObj.quit()
-
-# submitted 8/3/2020
-# changed to 24 hour scheduled,still using 8.8.8.8
-
-#test change, just to make sure this is working correctly
