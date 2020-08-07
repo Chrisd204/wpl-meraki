@@ -1,6 +1,6 @@
 #Referenced Shiyue (Shay) Cheng, shiychen@cisco.com github site for api calls
 import requests, json
-import datetime, sys, smtplib
+import datetime, sys, os, smtplib
 import pandas as pd
 from pandas import ExcelWriter
 import login
@@ -72,3 +72,6 @@ subject = "Weekly Packet Loss Updates"
 smtpObj.login(login.lab_email,login.lab_email_password)
 smtpObj.sendmail(login.lab_email,login.company_email, message)
 smtpObj.quit()
+
+# ------ move files to archive folder
+    #os.system('mv ~/Documents/test/*.txt ~/Downloads/dtest/')

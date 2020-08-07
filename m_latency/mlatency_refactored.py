@@ -1,6 +1,6 @@
 #Referenced Shiyue (Shay) Cheng, shiychen@cisco.com github site for api calls
-import requests, json, smtplib
-import datetime, sys
+import requests, json
+import datetime, sys, os, smtplib
 import pandas as pd
 from pandas import ExcelWriter
 import login
@@ -61,4 +61,6 @@ if __name__ == '__main__':
             continue
     final_results = list(dict.fromkeys(results))
 
+# ------ move files to archive folder
+    #os.system('mv ~/Documents/test/*.txt ~/Downloads/dtest/')
 print(final_results)
