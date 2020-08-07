@@ -5,10 +5,6 @@ import pandas as pd
 from pandas import ExcelWriter
 import login
 
-# 24 hours 86400
-# 7 days 604800
-# Goverlan 184.168.131.241
-
 #random function for getting network id
 def get_network_name(network_id, networks):
     return [element for element in networks if network_id == element['id']][0]['name']
