@@ -48,6 +48,7 @@ if __name__ == '__main__':
     sites = pd.read_excel(w, sheet_name=None)
     site_keys = sites.keys()
 
+
     results = []
     for office in site_keys:
         try:
@@ -56,6 +57,15 @@ if __name__ == '__main__':
         except KeyError:
             continue
     final_results = list(dict.fromkeys(results))
+    
+# ----- Find the averages for latency
+    averages = []
+    for latency in results:
+        try:
+            for average_latency in sites[latency]['latencyMs']:
+
+        except KeyError:
+            continue           
 
 # ------ move files to archive folder
     os.system('mv ~/Documents/code/wpl-meraki/*.xlsx ~/Documents/code/wpl-t-archive/')
