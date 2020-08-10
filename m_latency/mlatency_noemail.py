@@ -58,5 +58,7 @@ if __name__ == '__main__':
     final_results = list(dict.fromkeys(results))
 
 # ------ move files to archive folder
-    #os.system('mv ~/Documents/test/*.txt ~/Downloads/dtest/')
-print(final_results)
+    os.system('mv ~/Documents/code/wpl-meraki/*.xlsx ~/Documents/code/wpl-t-archive/')
+
+email_body_df = pd.DataFrame(final_results, columns=['Sites above 4%'])
+print(email_body_df)
