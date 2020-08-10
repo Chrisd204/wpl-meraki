@@ -56,18 +56,20 @@ if __name__ == '__main__':
         except KeyError:
             continue
     final_results = list(dict.fromkeys(results))
+    email_body_df = pd.DataFrame(final_results, columns=['Sites above 4%'])
+    
 
 # ------ send mail to company email with site list
 smtpObj = smtplib.SMTP(login.smtp_server,login.smtp_port)
 smtpObj.ehlo()
 smtpObj.starttls()
 message = ("""Subject: Alert for Community Options Inc -All Mx's - Uplink Packet Loss & Latency\n
-The following sites have experienced packet loss above 4 percent during the last 7 days.\n\n
-""" + str(final_results))
+The following sites have experienced packet loss above 4 over the last 24 hours.\n\n
+""" + str(email_body_df))
 subject = "Weekly Packet Loss Updates"
 smtpObj.login(login.lab_email,login.lab_email_password)
 smtpObj.sendmail(login.lab_email,login.company_email, message)
 smtpObj.quit()
 
 # ------ move files to archive folder
-    #os.system('mv ~/Documents/test/*.txt ~/Downloads/dtest/')
+os.system('mv ~/Documents/code/wpl-meraki/*.xlsx ~/Documents/code/wpl-t-archive/')
