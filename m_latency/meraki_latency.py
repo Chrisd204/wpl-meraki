@@ -9,6 +9,32 @@ import login
 def get_network_name(network_id, networks):
     return [element for element in networks if network_id == element['id']][0]['name']
 
+# ------- function iterate over workbook for sites with packet loss
+def latency_averages(file_name):
+
+    global email_body_df # needed to use varibale outside of function.
+
+    sites = pd.read_excel(w, sheet_name=None, dtype={'latencyMs':int})
+    site_keys = sites.keys()
+
+    averages = []
+    results = []
+    for office in site_keys:
+        try:
+            for loss in sites[office]['lossPercent'].where(sites[office]['lossPercent'] > 4.0).dropna():
+                latencyMs_column = sites[office]['latencyMs']
+                average = latencyMs_column.mean().round(2)
+                results.append(office)
+                averages.append(average)
+        except KeyError:
+            continue
+
+        final_results = list(dict.fromkeys(results))
+        final_averages = list(dict.fromkeys(averages))
+
+        d = {'Sites':final_results, 'Latency Averages':final_averages}
+        email_body_df = pd.DataFrame(d)
+
 if __name__ == '__main__':
     try:
         import login
@@ -43,36 +69,11 @@ if __name__ == '__main__':
             df.to_excel(w, sheet_name=str(device_name), index=False)
             w.save()
 
-# ------- function iterate over workbook for sites with packet loss
-    def latency_averages(file_name):
-
-        sites = pd.read_excel(w, sheet_name=None, dtype={'latencyMs':int})
-        site_keys = sites.keys()
-
-        averages = []
-        results = []
-        for office in site_keys:
-            try:
-                for loss in sites[office]['lossPercent'].where(sites[office]['lossPercent'] > 4.0).dropna():
-                    latencyMs_column = sites[office]['latencyMs']
-                    average = latencyMs_column.mean().round(2)
-                    results.append(office)
-                    averages.append(average)
-            except KeyError:
-                continue
-
-        final_results = list(dict.fromkeys(results))
-        final_averages = list(dict.fromkeys(averages))
-
-        d = {'Sites':final_results, 'Latency Averages':final_averages}
-        email_body_df = pd.DataFrame(d)
-
-        return email_body_df # returned variable to use outside of function.
+# -- call function on excel workbook
     latency_averages(w)
 
 # ------ send mail to company email with site list
     def send_email(data):
-
         smtpObj = smtplib.SMTP(login.smtp_server,login.smtp_port)
         smtpObj.ehlo()
         smtpObj.starttls()
@@ -86,6 +87,13 @@ if __name__ == '__main__':
     send_email(email_body_df)
 
 
+    def send_to_excel(df):
+        df = email_body_df
+        writer = pd.ExcelWriter('averages-'+str(today)+'.xlsx')
+        df.to_excel(writer, sheet_name='Averages')
+        writer.save()
+ 
+    send_to_excel(email_body_df)
 
     # ------ move files to archive folder
     #os.system('mv ~/Documents/code/wpl-meraki/*.xlsx ~/Documents/code/wpl-t-archive/')
