@@ -8,8 +8,7 @@ import login
 #random function for getting network id
 def get_network_name(network_id, networks):
     return [element for element in networks if network_id == element['id']][0]['name']
-    
-#------ if statement to authenicate and make api request
+
 if __name__ == '__main__':
     try:
         import login
@@ -44,32 +43,49 @@ if __name__ == '__main__':
             df.to_excel(w, sheet_name=str(device_name), index=False)
             w.save()
 
-# ------- iterate over workbook for sites with packet loss
-    sites = pd.read_excel(w, sheet_name=None)
-    site_keys = sites.keys()
+# ------- function iterate over workbook for sites with packet loss
+    def latency_averages(file_name):
 
-    results = []
-    for office in site_keys:
-        try:
-            for loss in sites[office]['lossPercent'].where(sites[office]['lossPercent'] > 4.0).dropna():
-                results.append(office)
-        except KeyError:
-            continue
-    final_results = list(dict.fromkeys(results))
-    email_body_df = pd.DataFrame(final_results, columns=['Sites above 4%'])
-    
+        sites = pd.read_excel(w, sheet_name=None, dtype={'latencyMs':int})
+        site_keys = sites.keys()
+
+        averages = []
+        results = []
+        for office in site_keys:
+            try:
+                for loss in sites[office]['lossPercent'].where(sites[office]['lossPercent'] > 4.0).dropna():
+                    latencyMs_column = sites[office]['latencyMs']
+                    average = latencyMs_column.mean().round(2)
+                    results.append(office)
+                    averages.append(average)
+            except KeyError:
+                continue
+
+        final_results = list(dict.fromkeys(results))
+        final_averages = list(dict.fromkeys(averages))
+
+        d = {'Sites':final_results, 'Latency Averages':final_averages}
+        email_body_df = pd.DataFrame(d)
+
+        return email_body_df # returned variable to use outside of function.
+    latency_averages(w)
 
 # ------ send mail to company email with site list
-smtpObj = smtplib.SMTP(login.smtp_server,login.smtp_port)
-smtpObj.ehlo()
-smtpObj.starttls()
-message = ("""Subject: Alert for Community Options Inc -All Mx's - Uplink Packet Loss & Latency\n
-The following sites have experienced packet loss above 4 over the last 24 hours.\n\n
-""" + str(email_body_df))
-subject = "Weekly Packet Loss Updates"
-smtpObj.login(login.lab_email,login.lab_email_password)
-smtpObj.sendmail(login.lab_email,login.company_email, message)
-smtpObj.quit()
+    def send_email(data):
 
-# ------ move files to archive folder
-os.system('mv ~/Documents/code/wpl-meraki/*.xlsx ~/Documents/code/wpl-t-archive/')
+        smtpObj = smtplib.SMTP(login.smtp_server,login.smtp_port)
+        smtpObj.ehlo()
+        smtpObj.starttls()
+        message = ("""Subject: Alert for Community Options Inc -All Mx's - Uplink Packet Loss & Latency\n
+        Updates for sites experiencing packet loss above 4 percent with average latency from past 24 hours.\n\n
+        """ + str(data))
+        smtpObj.login(login.lab_email,login.lab_email_password)
+        smtpObj.sendmail(login.lab_email,login.company_email, message)
+        smtpObj.quit()
+
+    send_email(email_body_df)
+
+
+
+    # ------ move files to archive folder
+    #os.system('mv ~/Documents/code/wpl-meraki/*.xlsx ~/Documents/code/wpl-t-archive/')

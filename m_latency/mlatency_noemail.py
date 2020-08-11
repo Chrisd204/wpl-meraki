@@ -5,7 +5,7 @@ import pandas as pd
 from pandas import ExcelWriter
 import login
 
-#random function for getting network id
+#--- random function for getting network id
 def get_network_name(network_id, networks):
     return [element for element in networks if network_id == element['id']][0]['name']
     
@@ -44,31 +44,31 @@ if __name__ == '__main__':
             df.to_excel(w, sheet_name=str(device_name), index=False)
             w.save()
 
-# ------- iterate over workbook for sites with packet loss
-    sites = pd.read_excel(w, sheet_name=None)
-    site_keys = sites.keys()
+# ------- function iterate over workbook for sites with packet loss
+    def latency_averages(file_name):
+        sites = pd.read_excel(w, sheet_name=None, dtype={'latencyMs':int})
+        site_keys = sites.keys()
 
+        averages = []
+        results = []
+        for office in site_keys:
+            try:
+                for loss in sites[office]['lossPercent'].where(sites[office]['lossPercent'] > 4.0).dropna():
+                    latencyMs_column = sites[office]['latencyMs']
+                    average = latencyMs_column.mean().round(2)
+                    results.append(office)
+                    averages.append(average)
+            except KeyError:
+                continue
 
-    results = []
-    for office in site_keys:
-        try:
-            for loss in sites[office]['lossPercent'].where(sites[office]['lossPercent'] > 4.0).dropna():
-                results.append(office)
-        except KeyError:
-            continue
-    final_results = list(dict.fromkeys(results))
-    
-# ----- Find the averages for latency
-    averages = []
-    for latency in results:
-        try:
-            for average_latency in sites[latency]['latencyMs']:
+        final_results = list(dict.fromkeys(results))
+        final_averages = list(dict.fromkeys(averages))
 
-        except KeyError:
-            continue           
+        d = {'Sites':final_results, 'Latency Averages':final_averages}
+
+        email_body_df = pd.DataFrame(d)
+        print(email_body_df)
+    latency_averages(w)
 
 # ------ move files to archive folder
-    os.system('mv ~/Documents/code/wpl-meraki/*.xlsx ~/Documents/code/wpl-t-archive/')
-
-email_body_df = pd.DataFrame(final_results, columns=['Sites above 4%'])
-print(email_body_df)
+#   os.system('mv ~/Documents/code/wpl-meraki/*.xlsx ~/Documents/code/wpl-t-archive/')
