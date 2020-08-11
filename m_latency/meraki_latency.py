@@ -94,6 +94,3 @@ if __name__ == '__main__':
         writer.save()
  
     send_to_excel(email_body_df)
-
-    # ------ move files to archive folder
-    #os.system('mv ~/Documents/code/wpl-meraki/*.xlsx ~/Documents/code/wpl-t-archive/')
