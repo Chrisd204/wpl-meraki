@@ -72,5 +72,25 @@ if __name__ == '__main__':
 # -- call function on excel workbook
     latency_averages(w)
 
+# ------ send mail to company email with site list
+    def send_email(data):
+        smtpObj = smtplib.SMTP(login.smtp_server,login.smtp_port)
+        smtpObj.ehlo()
+        smtpObj.starttls()
+        message = ("""Subject: Alert for Community Options Inc -All Mx's - Uplink Packet Loss & Latency\n
+        Updates for sites experiencing packet loss above 4 percent with average latency from past 24 hours.\n\n
+        """ + str(data))
+        smtpObj.login(login.lab_email,login.lab_email_password)
+        smtpObj.sendmail(login.lab_email,login.company_email, message)
+        smtpObj.quit()
+
+    send_email(email_body_df)
 
 
+    def send_to_excel(df):
+        df = email_body_df
+        writer = pd.ExcelWriter('averages-'+str(today)+'.xlsx')
+        df.to_excel(writer, sheet_name='Averages')
+        writer.save()
+ 
+    send_to_excel(email_body_df)
