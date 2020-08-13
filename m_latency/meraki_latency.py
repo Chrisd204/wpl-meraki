@@ -94,7 +94,7 @@ if __name__ == '__main__':
         msg['From'] =login.lab_email
         msg['To'] = login.company_email 
         msg['Subject'] = "Alert for Community Options Inc -All Mx's - Uplink Packet Loss & Latency"
-        body = "Attached are updates for sites who have experienced packet loss above 4 percent within the last 24hrs, along with site latency averages."
+        body = "Attached are updates for sites experiencing packet loss above 4 percent within the last 24hrs, along with site latency averages."
         msg.attach(MIMEText(body, 'plain')) 
         filename = 'averages-'+str(today)+'.xlsx'
         attachment = open('/home/ntadmin/averages-'+str(today)+'.xlsx', "rb") 
