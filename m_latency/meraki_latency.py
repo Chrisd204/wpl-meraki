@@ -91,10 +91,10 @@ if __name__ == '__main__':
 # ------ send mail to company email with site list
     def send_email(data):
         msg = MIMEMultipart() 
-        msg['From'] =login.lab_email
+        msg['From'] =login.monitor_email
         msg['To'] = login.company_email 
         msg['Subject'] = "Alert for Community Options Inc -All Mx's - Uplink Packet Loss & Latency"
-        body = "Please see attached."
+        body = "Attached are updates for sites experiencing packet loss above 4 percent within the last 24hrs, along with site latency averages."
         msg.attach(MIMEText(body, 'plain')) 
         filename = 'averages-'+str(today)+'.xlsx'
         attachment = open('/home/cdurham/Documents/code/wpl-meraki/averages-'+str(today)+'.xlsx', "rb") 
@@ -105,9 +105,9 @@ if __name__ == '__main__':
         msg.attach(p) 
         s = smtplib.SMTP(login.smtp_server,login.smtp_port) 
         s.starttls() 
-        s.login(login.lab_email, login.lab_email_password)
+        s.login(login.monitor_email, login.monitor_email_password)
         text = msg.as_string()
-        s.sendmail(login.lab_email, login.company_email, text) 
+        s.sendmail(login.monitor_email, login.company_email, text) 
         s.quit() 
 
     send_email(email_body_df)
