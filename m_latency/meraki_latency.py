@@ -97,7 +97,7 @@ if __name__ == '__main__':
         body = "Attached are updates for sites experiencing packet loss above 4 percent within the last 24hrs, along with site latency averages."
         msg.attach(MIMEText(body, 'plain')) 
         filename = 'averages-'+str(today)+'.xlsx'
-        attachment = open('/home/cdurham/Documents/code/wpl-meraki/averages-'+str(today)+'.xlsx', "rb") 
+        attachment = open('/home/ntadmin/averages-'+str(today)+'.xlsx', "rb") 
         p = MIMEBase('application', 'octet-stream') 
         p.set_payload((attachment).read()) 
         encoders.encode_base64(p)   
