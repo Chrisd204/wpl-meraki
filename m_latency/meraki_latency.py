@@ -25,7 +25,7 @@ def latency_averages(file_name):
     results = []
     for office in site_keys:
         try:
-            for loss in sites[office]['lossPercent'].where(sites[office]['lossPercent'] > 4.0).dropna():
+            for loss in sites[office]['lossPercent'].where(sites[office]['lossPercent'] >= 18.0).dropna():
                 latencyMs_column = sites[office]['latencyMs']
                 average = latencyMs_column.mean().round(2)
                 results.append(office)
