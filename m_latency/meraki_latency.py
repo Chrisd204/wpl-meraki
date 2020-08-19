@@ -33,10 +33,12 @@ def latency_averages(file_name):
         except KeyError:
             continue
 
-        final_results = list(dict.fromkeys(results))
-        final_averages = list(dict.fromkeys(averages))
+        list_results = list(dict.fromkeys(results))
+        list_averages = list(dict.fromkeys(averages))
+        s1 = pd.Series(list_results, name='Sites')
+        s2 = pd.Series(list_averages, name='Latency Averages')
 
-        d = {'Sites':final_results, 'Latency Averages':final_averages}
+        d = pd.concat([s1,s2], axis=1)
         email_body_df = pd.DataFrame(d)
 
 def send_to_excel(df):
