@@ -25,7 +25,7 @@ def latency_averages(file_name):
     results = []
     for office in site_keys:
         try:
-            for loss in sites[office]['lossPercent'].where(sites[office]['lossPercent'] > 4.0).dropna():
+            for loss in sites[office]['lossPercent'].where(sites[office]['lossPercent'] >= 18.0).dropna():
                 latencyMs_column = sites[office]['latencyMs']
                 average = latencyMs_column.mean().round(2)
                 results.append(office)
@@ -92,12 +92,12 @@ if __name__ == '__main__':
     def send_email(data):
         msg = MIMEMultipart() 
         msg['From'] =login.monitor_email
-        msg['To'] = login.company_email 
+        msg['To'] = login.my_email 
         msg['Subject'] = "Alert for Community Options Inc -All Mx's - Uplink Packet Loss & Latency"
         body = "Attached are updates for sites experiencing packet loss above 4 percent within the last 24hrs, along with site latency averages."
         msg.attach(MIMEText(body, 'plain')) 
         filename = 'averages-'+str(today)+'.xlsx'
-        attachment = open('/home/ntadmin/averages-'+str(today)+'.xlsx', "rb") 
+        attachment = open('/home/cdurham/Documents/code/wpl-meraki/averages-'+str(today)+'.xlsx', "rb") 
         p = MIMEBase('application', 'octet-stream') 
         p.set_payload((attachment).read()) 
         encoders.encode_base64(p)   
@@ -107,7 +107,7 @@ if __name__ == '__main__':
         s.starttls() 
         s.login(login.monitor_email, login.monitor_email_password)
         text = msg.as_string()
-        s.sendmail(login.monitor_email, login.company_email, text) 
+        s.sendmail(login.monitor_email, login.my_email, text) 
         s.quit() 
 
     send_email(email_body_df)
