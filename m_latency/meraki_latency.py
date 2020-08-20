@@ -101,9 +101,9 @@ if __name__ == '__main__':
     def send_email(data):
         msg = MIMEMultipart() 
         msg['From'] =login.monitor_email
-        msg['To'] = login.my_email 
+        msg['To'] = login.company_email 
         msg['Subject'] = "Alert for Community Options Inc -All Mx's - Uplink Packet Loss & Latency"
-        body = "Attached are updates for sites experiencing packet within the last 24hrs, along with site latency averages."
+        body = "Attached are updates for sites experiencing packet loss within the last 24hrs, along with site latency averages in milliseconds."
         msg.attach(MIMEText(body, 'plain')) 
         filename = 'averages-'+str(today)+'.xlsx'
         attachment = open('/home/ntadmin/averages-'+str(today)+'.xlsx', "rb") 
@@ -116,7 +116,7 @@ if __name__ == '__main__':
         s.starttls() 
         s.login(login.monitor_email, login.monitor_email_password)
         text = msg.as_string()
-        s.sendmail(login.monitor_email, login.my_email, text) 
+        s.sendmail(login.monitor_email, login.company_email, text) 
         s.quit() 
 
     send_email(email_body_df)

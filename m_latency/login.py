@@ -7,8 +7,8 @@ company_email = 'Meraki_Alerts@comop.org'
 
 my_email = 'Christopher.Durham@comop.org'
 
-monitor_email = 'comop.monitorbox@gmail.com'
-monitor_email_password = 'eKTmE&yM91tIJ6mIGVwl!CM#HZxebRjehTvf7s2Da'
+monitor_email = 'noreply.monitorbox@comop.org'
+monitor_email_password = 'j@ckth3r1pp3r'
 
 smtp_port = 587
 smtp_server = "smtp.gmail.com"
