@@ -5,8 +5,8 @@ import datetime, sys, os, smtplib
 import pandas as pd
 import numpy as np
 from pandas import ExcelWriter
-from email.mime.multipart import MIMEMultipart 
-from email.mime.text import MIMEText 
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 from email.mime.base import MIMEBase 
 from email import encoders
 
@@ -106,7 +106,7 @@ if __name__ == '__main__':
         body = "Attached are updates for sites experiencing packet within the last 24hrs, along with site latency averages."
         msg.attach(MIMEText(body, 'plain')) 
         filename = 'averages-'+str(today)+'.xlsx'
-        attachment = open('/media/cdurham/MasterCard/Python/Comop/wpl-meraki/averages-'+str(today)+'.xlsx', "rb") 
+        attachment = open('/home/ntadmin/wpl-meraki/averages-'+str(today)+'.xlsx', "rb") 
         p = MIMEBase('application', 'octet-stream') 
         p.set_payload((attachment).read()) 
         encoders.encode_base64(p)   
