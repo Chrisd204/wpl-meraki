@@ -3,6 +3,7 @@ import login
 import requests, json
 import datetime, sys, os, smtplib
 import pandas as pd
+import numpy as np
 from pandas import ExcelWriter
 from email.mime.multipart import MIMEMultipart 
 from email.mime.text import MIMEText 
@@ -21,22 +22,30 @@ def latency_averages(file_name):
     sites = pd.read_excel(w, sheet_name=None, dtype={'latencyMs':int})
     site_keys = sites.keys()
 
+    lp_averages = []
     averages = []
     results = []
     for office in site_keys:
         try:
-            for loss in sites[office]['lossPercent'].where(sites[office]['lossPercent'] > 4.0).dropna():
+            for loss in sites[office]['lossPercent'].where(sites[office]['lossPercent'] >= 18.0).dropna():
                 latencyMs_column = sites[office]['latencyMs']
-                average = latencyMs_column.mean().round(2)
+                lossPercent_column = sites[office]['lossPercent']
+                average = latencyMs_column.replace(0, np.NaN).mean().round(2)
+                lp_average = lossPercent_column.replace(0, np.NaN).mean().round(2)
+                lp_averages.append(lp_average)
                 results.append(office)
                 averages.append(average)
         except KeyError:
             continue
 
-        final_results = list(dict.fromkeys(results))
-        final_averages = list(dict.fromkeys(averages))
+        list_results = list(dict.fromkeys(results))
+        list_averages = list(dict.fromkeys(averages))
+        list_lp_averages = list(dict.fromkeys(lp_averages))
+        s1 = pd.Series(list_results, name='Sites')
+        s2 = pd.Series(list_averages, name='Latency Averages')
+        s3 = pd.Series(list_lp_averages, name='lossPercent Averages')
 
-        d = {'Sites':final_results, 'Latency Averages':final_averages}
+        d = pd.concat([s1,s3,s2], axis=1)
         email_body_df = pd.DataFrame(d)
 
 def send_to_excel(df):
@@ -91,13 +100,13 @@ if __name__ == '__main__':
 # ------ send mail to company email with site list
     def send_email(data):
         msg = MIMEMultipart() 
-        msg['From'] =login.lab_email
-        msg['To'] = login.company_email 
+        msg['From'] =login.monitor_email
+        msg['To'] = login.my_email 
         msg['Subject'] = "Alert for Community Options Inc -All Mx's - Uplink Packet Loss & Latency"
-        body = "Please see attached."
+        body = "Attached are updates for sites experiencing packet within the last 24hrs, along with site latency averages."
         msg.attach(MIMEText(body, 'plain')) 
         filename = 'averages-'+str(today)+'.xlsx'
-        attachment = open('/home/cdurham/Documents/code/wpl-meraki/averages-'+str(today)+'.xlsx', "rb") 
+        attachment = open('/media/cdurham/MasterCard/Python/Comop/wpl-meraki/averages-'+str(today)+'.xlsx', "rb") 
         p = MIMEBase('application', 'octet-stream') 
         p.set_payload((attachment).read()) 
         encoders.encode_base64(p)   
@@ -105,9 +114,9 @@ if __name__ == '__main__':
         msg.attach(p) 
         s = smtplib.SMTP(login.smtp_server,login.smtp_port) 
         s.starttls() 
-        s.login(login.lab_email, login.lab_email_password)
+        s.login(login.monitor_email, login.monitor_email_password)
         text = msg.as_string()
-        s.sendmail(login.lab_email, login.company_email, text) 
+        s.sendmail(login.monitor_email, login.my_email, text) 
         s.quit() 
 
     send_email(email_body_df)
