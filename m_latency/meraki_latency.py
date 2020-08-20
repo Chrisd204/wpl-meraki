@@ -30,8 +30,8 @@ def latency_averages(file_name):
             for loss in sites[office]['lossPercent'].where(sites[office]['lossPercent'] >= 18.0).dropna():
                 latencyMs_column = sites[office]['latencyMs']
                 lossPercent_column = sites[office]['lossPercent']
-                average = latencyMs_column.replace(0, np.NaN).mean().round(2)
-                lp_average = lossPercent_column.replace(0, np.NaN).mean().round(2)
+                average = latencyMs_column.mean().round(2)
+                lp_average = lossPercent_column.mean().round(2)
                 lp_averages.append(lp_average)
                 results.append(office)
                 averages.append(average)
