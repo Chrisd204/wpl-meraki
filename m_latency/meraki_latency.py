@@ -1,5 +1,6 @@
 #Referenced Shiyue (Shay) Cheng, shiychen@cisco.com github site for api calls
 import login
+from emailList import SendEmail
 import requests, json
 import datetime, sys, os, smtplib
 import pandas as pd
@@ -15,46 +16,47 @@ def get_network_name(network_id, networks):
     return [element for element in networks if network_id == element['id']][0]['name']
 
 # ------- function iterate over workbook for sites with packet loss
-def latency_averages(file_name):
+def get_averages(file_name):
+
 
     global email_body_df # needed to use varibale outside of function.
 
-    sites = pd.read_excel(w, sheet_name=None, dtype={'latencyMs':int})
+    sites = pd.read_excel(w, sheet_name=None, dtype={'latencyMs':float})
     site_keys = sites.keys()
 
-    lp_averages = []
-    averages = []
     results = []
+    average_latencyMs = []
+
+    lossPercent_threshold = 101
     for office in site_keys:
         try:
-            for loss in sites[office]['lossPercent'].where(sites[office]['lossPercent'] >= 18.0).dropna():
-                latencyMs_column = sites[office]['latencyMs']
-                lossPercent_column = sites[office]['lossPercent']
-                average = latencyMs_column.mean().round(2)
-                lp_average = lossPercent_column.mean().round(2)
-                lp_averages.append(lp_average)
+            for loss in sites[office]['lossPercent'].truncate(before = 670, after =1270).where(sites[office]['lossPercent'].truncate(before = 670, after =1270) == lossPercent_threshold).dropna():
                 results.append(office)
-                averages.append(average)
+
+                latencyMs = sites[office]['latencyMs']
+                average_for_latencyMs = latencyMs.mean()
+                average_latencyMs.append(average_for_latencyMs)
+
         except KeyError:
             continue
 
         list_results = list(dict.fromkeys(results))
-        list_averages = list(dict.fromkeys(averages))
-        list_lp_averages = list(dict.fromkeys(lp_averages))
-        s1 = pd.Series(list_results, name='Sites')
-        s2 = pd.Series(list_averages, name='Latency Averages')
-        s3 = pd.Series(list_lp_averages, name='lossPercent Averages')
+        list_average_latencyMs = list(dict.fromkeys(average_latencyMs))
 
-        d = pd.concat([s1,s3,s2], axis=1)
+        s1 = pd.Series(list_results, dtype='string', name='Sites')
+        s2 = pd.Series(list_average_latencyMs, dtype='float64', name='Latency in Ms')
+
+        d = pd.concat([s1,s2], axis=1)
         email_body_df = pd.DataFrame(d)
 
-def send_to_excel(df):
 
+
+def send_to_excel(df):
     global writer
 
     df = email_body_df
     writer = pd.ExcelWriter('averages-'+str(today)+'.xlsx')
-    df.to_excel(writer, sheet_name='Averages')
+    df.to_excel(writer, sheet_name='Averages',float_format="%.1f")
     writer.save()
 
 if __name__ == '__main__':
@@ -81,6 +83,7 @@ if __name__ == '__main__':
     today = datetime.date.today()
     w = pd.ExcelWriter('wpl-'+str(today)+'.xlsx') # creates file name
     for appliance in appliances:
+
             device_name = json.loads(session.get('https://api.meraki.com/api/v0/networks/' + appliance['networkId'] + '/devices/' + appliance['serial'], headers=headers).text)['name']
             packloss_latency = json.loads(session.get('https://api.meraki.com/api/v0/networks/'+appliance['networkId'] + '/devices/'+appliance['serial']+ '/lossAndLatencyHistory?uplink=wan1&ip=8.8.8.8&timespan=86400', headers=headers).text)
             try:
@@ -88,35 +91,21 @@ if __name__ == '__main__':
             except:
                 print('Found appliance ' + appliance['serial'])
             df = pd.DataFrame(packloss_latency)
-            df.to_excel(w, sheet_name=str(device_name), index=False)
+            df.to_excel(w, sheet_name=str(device_name),float_format="%.1f")
             w.save()
 
+
 # -- call function on excel workbook
-    latency_averages(w)
+    get_averages(w)
 
 # --- call function to send averages to excel
     send_to_excel(email_body_df)
 
 # ------ send mail to company email with site list
-    def send_email(data):
-        msg = MIMEMultipart() 
-        msg['From'] =login.monitor_email
-        msg['To'] = login.my_email 
-        msg['Subject'] = "Alert for Community Options Inc -All Mx's - Uplink Packet Loss & Latency"
-        body = "Attached are updates for sites experiencing packet within the last 24hrs, along with site latency averages."
-        msg.attach(MIMEText(body, 'plain')) 
-        filename = 'averages-'+str(today)+'.xlsx'
-        attachment = open('/home/cdurham/Documents/code/wpl-meraki/averages-'+str(today)+'.xlsx', "rb") 
-        p = MIMEBase('application', 'octet-stream') 
-        p.set_payload((attachment).read()) 
-        encoders.encode_base64(p)   
-        p.add_header('Content-Disposition', "attachment; filename= %s" % filename)
-        msg.attach(p) 
-        s = smtplib.SMTP(login.smtp_server,login.smtp_port) 
-        s.starttls() 
-        s.login(login.monitor_email, login.monitor_email_password)
-        text = msg.as_string()
-        s.sendmail(login.monitor_email, login.my_email, text) 
-        s.quit() 
+    if email_body_df.empty:
+        print ("Look man, you figured it out, but nothing to see here!! Check back tomorrow")
+        SendEmail.no_data_email(email_body_df)
 
-    send_email(email_body_df)
+    else:
+        print("Look's like we have big things to report,I'm going to send off the email! :)")
+        SendEmail.my_email(email_body_df)
