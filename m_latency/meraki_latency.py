@@ -27,10 +27,11 @@ def get_averages(file_name):
     results = []
     average_latencyMs = []
 
-    lossPercent_threshold = 101
+    lossPercent_threshold = 100
+
     for office in site_keys:
         try:
-            for loss in sites[office]['lossPercent'].truncate(before = 670, after =1270).where(sites[office]['lossPercent'].truncate(before = 670, after =1270) == lossPercent_threshold).dropna():
+            for loss in sites[office]['lossPercent'].truncate(before = 1190, after = 1787).where(sites[office]['lossPercent'].truncate(before = 1190, after = 1787) == lossPercent_threshold).dropna():
                 results.append(office)
 
                 latencyMs = sites[office]['latencyMs']
@@ -84,7 +85,7 @@ if __name__ == '__main__':
     for appliance in appliances:
 
             device_name = json.loads(session.get('https://api.meraki.com/api/v0/networks/' + appliance['networkId'] + '/devices/' + appliance['serial'], headers=headers).text)['name']
-            packloss_latency = json.loads(session.get('https://api.meraki.com/api/v0/networks/'+appliance['networkId'] + '/devices/'+appliance['serial']+ '/lossAndLatencyHistory?uplink=wan1&ip=8.8.8.8&timespan=86400', headers=headers).text)
+            packloss_latency = json.loads(session.get('https://api.meraki.com/api/v0/networks/'+appliance['networkId'] + '/devices/'+appliance['serial']+ '/lossAndLatencyHistory?uplink=wan1&ip=8.8.8.8&timespan=172800', headers=headers).text)
             try:
                 print('Found appliance ' + device_name)
             except:
