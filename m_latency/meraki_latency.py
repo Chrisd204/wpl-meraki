@@ -32,11 +32,13 @@ def get_averages(file_name):
     for office in site_keys:
         try:
             for loss in sites[office]['lossPercent'].truncate(before = 1190, after = 1787).where(sites[office]['lossPercent'].truncate(before = 1190, after = 1787) == lossPercent_threshold).dropna():
-                results.append(office)
+                count = len((sites[office]['lossPercent'].truncate(before = 1190, after = 1787) == lossPercent_threshold))
+                if count > 10:
+                    results.append(office)
 
-                latencyMs = sites[office]['latencyMs']
-                average_for_latencyMs = latencyMs.mean()
-                average_latencyMs.append(average_for_latencyMs)
+                    latencyMs = sites[office]['latencyMs']
+                    average_for_latencyMs = latencyMs.mean()
+                    average_latencyMs.append(average_for_latencyMs)
 
         except KeyError:
             continue
