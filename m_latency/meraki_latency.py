@@ -27,15 +27,17 @@ def get_averages(file_name):
     results = []
     average_latencyMs = []
 
-    lossPercent_threshold = 101
+    lossPercent_threshold = 100
     for office in site_keys:
         try:
-            for loss in sites[office]['lossPercent'].truncate(before = 670, after =1270).where(sites[office]['lossPercent'].truncate(before = 670, after =1270) == lossPercent_threshold).dropna():
-                results.append(office)
+            for loss in sites[office]['lossPercent'].truncate(before = 1190, after =1787).where(sites[office]['lossPercent'].truncate(before = 1190, after =1787) == lossPercent_threshold).dropna():
+                count = len((sites[office]['lossPercent'].truncate(before = 1190, after =1787) == lossPercent_threshold))
+                if count > 10:
+                    results.append(office)
 
-                latencyMs = sites[office]['latencyMs']
-                average_for_latencyMs = latencyMs.mean()
-                average_latencyMs.append(average_for_latencyMs)
+                    latencyMs = sites[office]['latencyMs']
+                    average_for_latencyMs = latencyMs.mean()
+                    average_latencyMs.append(average_for_latencyMs)
 
         except KeyError:
             continue
@@ -84,7 +86,7 @@ if __name__ == '__main__':
     for appliance in appliances:
 
             device_name = json.loads(session.get('https://api.meraki.com/api/v0/networks/' + appliance['networkId'] + '/devices/' + appliance['serial'], headers=headers).text)['name']
-            packloss_latency = json.loads(session.get('https://api.meraki.com/api/v0/networks/'+appliance['networkId'] + '/devices/'+appliance['serial']+ '/lossAndLatencyHistory?uplink=wan1&ip=8.8.8.8&timespan=86400', headers=headers).text)
+            packloss_latency = json.loads(session.get('https://api.meraki.com/api/v0/networks/'+appliance['networkId'] + '/devices/'+appliance['serial']+ '/lossAndLatencyHistory?uplink=wan1&ip=8.8.8.8&timespan=172800', headers=headers).text)
             try:
                 print('Found appliance ' + device_name)
             except:
@@ -107,4 +109,4 @@ if __name__ == '__main__':
 
     else:
         print("Look's like we have big things to report,I'm going to send off the email! :)")
-        SendEmail.my_email(email_body_df)
+        SendEmail.meraki_email(email_body_df)
