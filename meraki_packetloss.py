@@ -33,7 +33,7 @@ def get_packetloss(file_name):
         try:
             for loss in (sites[office]['lossPercent'] == lossPercent_threshold).dropna():
                 count = (sites[office]['lossPercent'] == lossPercent_threshold).sum()
-                if count >= 5 and count < 60:
+                if count >= 500 and count < 6000:
                     results.append(office)
 
                     latencyMs = sites[office]['latencyMs']
